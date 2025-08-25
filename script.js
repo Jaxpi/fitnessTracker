@@ -1,5 +1,5 @@
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js')
+  navigator.serviceWorker.register('sw.js', { scope: './' })
     .then(reg => console.log('Service Worker registered:', reg))
     .catch(err => console.error('Service Worker registration failed:', err));
 }
@@ -151,3 +151,11 @@ function updateLocalStorage() {
 
   localStorage.setItem("fitnessHistory", JSON.stringify(updatedHistory));
 }
+
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  console.log('Install prompt captured');
+  // You can now show a custom install button and call deferredPrompt.prompt() when clicked
+});
