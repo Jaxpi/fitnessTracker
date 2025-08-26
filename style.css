@@ -222,14 +222,16 @@ input[type="submit"]:hover {
 }
 
 #historyTable th {
-  width: 100px;
+  width: 90px;
   padding-bottom: 5px;
+    font-size: 10px;
 }
 
 #historyTable td {
-  width: 100px;
+  width: 90px;
   color: black;
   padding: 4px;
+    font-size: 10px;
 }
 
 .delButton {
