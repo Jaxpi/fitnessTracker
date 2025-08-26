@@ -81,7 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
       grouped[entry.date].push(entry);
     });
 
-    const dates = Object.keys(grouped);
+ const dates = Object.keys(grouped).sort().reverse();
     let lastDate = null;
     let toggle = false;
 
