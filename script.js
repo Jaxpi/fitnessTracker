@@ -81,12 +81,12 @@ document.addEventListener("DOMContentLoaded", () => {
       grouped[entry.date].push(entry);
     });
 
- const dates = Object.keys(grouped).sort().reverse();
+    const dates = Object.keys(grouped).sort().reverse();
     let lastDate = null;
     let toggle = false;
 
     dates.forEach((date) => {
-      grouped[date].forEach((entry) => {
+grouped[date].slice().reverse().forEach((entry) => {
         // Toggle color only when the date changes
         if (entry.date !== lastDate) {
           toggle = !toggle;
