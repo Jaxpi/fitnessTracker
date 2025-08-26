@@ -1,7 +1,16 @@
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js', { scope: './' })
-    .then(reg => console.log('Service Worker registered:', reg))
-    .catch(err => console.error('Service Worker registration failed:', err));
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker
+    .register("sw.js", { scope: "./" })
+    .then((reg) => console.log("Service Worker registered:", reg))
+    .catch((err) => console.error("Service Worker registration failed:", err));
+}
+
+function flashWhiteScreen() {
+  const flash = document.getElementById("screenFlash");
+  flash.style.opacity = "1";
+  setTimeout(() => {
+    flash.style.opacity = "0";
+  }, 200);
 }
 
 // ---------- Form Controls ----------
@@ -42,6 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
       let history = JSON.parse(localStorage.getItem("fitnessHistory")) || [];
       history.unshift(entry); // Add to top
       localStorage.setItem("fitnessHistory", JSON.stringify(history));
+      flashWhiteScreen();
 
       form.reset();
       closeForm();
@@ -56,7 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
     table.innerHTML = `
       <thead>
         <tr>
-          <th>Date</th><th>Exercise</th><th>Sets</th><th>Reps</th><th>Weight</th><th>Machine</th><th>✖</th>
+          <th>Date</th><th>Exercise</th><th>Sets</th><th>Reps/Mins</th><th>Weight/Setting</th><th>Machine</th><th>Delete</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -72,12 +82,19 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     const dates = Object.keys(grouped);
-    dates.forEach((date, index) => {
-      const bgColor = index % 2 === 0 ? "#ffffff" : "#f0f0f0";
+    let lastDate = null;
+    let toggle = false;
 
-      grouped[date].forEach((entry, entryIndex) => {
+    dates.forEach((date) => {
+      grouped[date].forEach((entry) => {
+        // Toggle color only when the date changes
+        if (entry.date !== lastDate) {
+          toggle = !toggle;
+          lastDate = entry.date;
+        }
+
         const row = document.createElement("tr");
-        row.style.backgroundColor = bgColor;
+        row.style.backgroundColor = toggle ? "#ffffff" : "#bbbbbbff";
 
         Object.values(entry).forEach((value) => {
           const cell = document.createElement("td");
@@ -87,8 +104,8 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         const deleteCell = document.createElement("td");
-          const deleteBtn = document.createElement("delButton");
-          deleteBtn.className = "delButton";
+        const deleteBtn = document.createElement("button");
+        deleteBtn.className = "delButton";
         deleteBtn.textContent = "✖";
         deleteBtn.onclick = () => {
           history.splice(history.indexOf(entry), 1);
@@ -98,7 +115,7 @@ document.addEventListener("DOMContentLoaded", () => {
         deleteCell.appendChild(deleteBtn);
         row.appendChild(deleteCell);
 
-        tbody.appendChild(row);
+        tbody.insertBefore(row, tbody.firstChild);
       });
     });
 
@@ -153,9 +170,9 @@ function updateLocalStorage() {
 }
 
 let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => {
+window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault();
   deferredPrompt = e;
-  console.log('Install prompt captured');
+  console.log("Install prompt captured");
   // You can now show a custom install button and call deferredPrompt.prompt() when clicked
 });
