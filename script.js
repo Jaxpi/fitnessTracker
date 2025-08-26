@@ -75,48 +75,39 @@ document.addEventListener("DOMContentLoaded", () => {
     const tbody = table.querySelector("tbody");
     const history = JSON.parse(localStorage.getItem("fitnessHistory")) || [];
 
-    const grouped = {};
-    history.forEach((entry) => {
-      if (!grouped[entry.date]) grouped[entry.date] = [];
-      grouped[entry.date].push(entry);
-    });
-
-    const dates = Object.keys(grouped).sort().reverse();
     let lastDate = null;
     let toggle = false;
 
-    dates.forEach((date) => {
-      [...grouped[date]].reverse().forEach((entry) => {
-        // Toggle color only when the date changes
-        if (entry.date !== lastDate) {
-          toggle = !toggle;
-          lastDate = entry.date;
-        }
+    history.forEach((entry) => {
+      // Toggle color only when the date changes
+      if (entry.date !== lastDate) {
+        toggle = !toggle;
+        lastDate = entry.date;
+      }
 
-        const row = document.createElement("tr");
-        row.style.backgroundColor = toggle ? "#ffffff" : "#bbbbbbff";
+      const row = document.createElement("tr");
+      row.style.backgroundColor = toggle ? "#ffffff" : "#bbbbbbff";
 
-        Object.values(entry).forEach((value) => {
-          const cell = document.createElement("td");
-          cell.textContent = value;
-          cell.addEventListener("click", () => makeEditable(cell));
-          row.appendChild(cell);
-        });
-
-        const deleteCell = document.createElement("td");
-        const deleteBtn = document.createElement("button");
-        deleteBtn.className = "delButton";
-        deleteBtn.textContent = "✖";
-        deleteBtn.onclick = () => {
-          history.splice(history.indexOf(entry), 1);
-          localStorage.setItem("fitnessHistory", JSON.stringify(history));
-          row.remove();
-        };
-        deleteCell.appendChild(deleteBtn);
-        row.appendChild(deleteCell);
-
-        tbody.insertBefore(row, tbody.firstChild);
+      Object.values(entry).forEach((value) => {
+        const cell = document.createElement("td");
+        cell.textContent = value;
+        cell.addEventListener("click", () => makeEditable(cell));
+        row.appendChild(cell);
       });
+
+      const deleteCell = document.createElement("td");
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className = "delButton";
+      deleteBtn.textContent = "✖";
+      deleteBtn.onclick = () => {
+        history.splice(history.indexOf(entry), 1);
+        localStorage.setItem("fitnessHistory", JSON.stringify(history));
+        row.remove();
+      };
+      deleteCell.appendChild(deleteBtn);
+      row.appendChild(deleteCell);
+
+      tbody.insertBefore(row, tbody.firstChild);
     });
 
     historySection.appendChild(table);
