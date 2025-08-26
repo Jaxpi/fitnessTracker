@@ -74,41 +74,43 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const tbody = table.querySelector("tbody");
     const history = JSON.parse(localStorage.getItem("fitnessHistory")) || [];
+history.forEach(entry => entry.date = entry.date.trim()); // optional cleanup
+history.sort((a, b) => new Date(b.date) - new Date(a.date)); // sort newest to oldest
 
-    let lastDate = null;
-    let toggle = false;
+// Now render the table
+let lastDate = null;
+let toggle = false;
 
-    history.forEach((entry) => {
-      // Toggle color only when the date changes
-      if (entry.date !== lastDate) {
-        toggle = !toggle;
-        lastDate = entry.date;
-      }
+history.forEach((entry) => {
+  if (entry.date !== lastDate) {
+    toggle = !toggle;
+    lastDate = entry.date;
+  }
 
-      const row = document.createElement("tr");
-      row.style.backgroundColor = toggle ? "#ffffff" : "#bbbbbbff";
+  const row = document.createElement("tr");
+  row.style.backgroundColor = toggle ? "#ffffff" : "#bbbbbbff";
 
-      Object.values(entry).forEach((value) => {
-        const cell = document.createElement("td");
-        cell.textContent = value;
-        cell.addEventListener("click", () => makeEditable(cell));
-        row.appendChild(cell);
-      });
+  Object.values(entry).forEach((value) => {
+    const cell = document.createElement("td");
+    cell.textContent = value;
+    cell.addEventListener("click", () => makeEditable(cell));
+    row.appendChild(cell);
+  });
 
-      const deleteCell = document.createElement("td");
-      const deleteBtn = document.createElement("button");
-      deleteBtn.className = "delButton";
-      deleteBtn.textContent = "✖";
-      deleteBtn.onclick = () => {
-        history.splice(history.indexOf(entry), 1);
-        localStorage.setItem("fitnessHistory", JSON.stringify(history));
-        row.remove();
-      };
-      deleteCell.appendChild(deleteBtn);
-      row.appendChild(deleteCell);
+  const deleteCell = document.createElement("td");
+  const deleteBtn = document.createElement("button");
+  deleteBtn.className = "delButton";
+  deleteBtn.textContent = "✖";
+  deleteBtn.onclick = () => {
+    history.splice(history.indexOf(entry), 1);
+    localStorage.setItem("fitnessHistory", JSON.stringify(history));
+    row.remove();
+  };
+  deleteCell.appendChild(deleteBtn);
+  row.appendChild(deleteCell);
 
-      tbody.insertBefore(row, tbody.firstChild);
-    });
+  tbody.insertBefore(row, tbody.firstChild);
+});
 
     historySection.appendChild(table);
   }
