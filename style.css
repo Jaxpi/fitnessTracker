@@ -223,6 +223,14 @@ input[type="submit"]:hover {
   color: white;
 }
 
+#history h2 {
+  color: white;
+}
+
+#historyTable {
+  padding-bottom: 20px;
+}
+
 #historyTable th {
   width: 80px;
   padding-bottom: 5px;
