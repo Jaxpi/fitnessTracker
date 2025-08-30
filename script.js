@@ -75,7 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const tbody = table.querySelector("tbody");
     const history = JSON.parse(localStorage.getItem("fitnessHistory")) || [];
 history.forEach(entry => entry.date = entry.date.trim()); // optional cleanup
-history.sort((a, b) => new Date(b.date) - new Date(a.date)); // sort newest to oldest
+history.sort((a, b) => new Date(a.date) - new Date(b.date)); // sort newest to oldest
 
 // Now render the table
 let lastDate = null;
