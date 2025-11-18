@@ -15,12 +15,47 @@ function flashWhiteScreen() {
 
 // ---------- Form Controls ----------
 function openForm(exerciseName) {
-  const form = document.getElementById("myForm");
+  const form = document.getElementById("myForm"); // ensure this is a <form id="myForm">
   const title = document.getElementById("formTitle");
-  if (form && title) {
-    form.style.display = "block";
-    form.setAttribute("data-exercise", exerciseName);
-    title.textContent = exerciseName;
+
+  // Input elements (use name attributes for consistency)
+  const setsInput = document.querySelector('#myForm [name="sets"]');
+  const repsInput = document.querySelector('#myForm [name="reps"]');
+  const weightInput = document.querySelector('#myForm [name="weight"]');
+  const machineInput = document.querySelector('#myForm [name="machine"]');
+
+  if (!form || !title || !setsInput || !repsInput || !weightInput || !machineInput) {
+    console.warn("Form or inputs not found. Check IDs and name attributes.");
+    return;
+  }
+
+  // Show form and set title
+  form.style.display = "block";
+  form.setAttribute("data-exercise", exerciseName);
+  title.textContent = exerciseName;
+
+  // Pull history and find most recent matching entry
+  let history = JSON.parse(localStorage.getItem("fitnessHistory")) || [];
+
+  // Because you unshift new entries, the first match is the most recent
+  const recentEntry = history.find(
+    (entry) =>
+      entry &&
+      typeof entry.exercise === "string" &&
+      entry.exercise.trim().toLowerCase() === exerciseName.trim().toLowerCase()
+  );
+
+  // Prefill or clear
+  if (recentEntry) {
+    setsInput.value = recentEntry.sets ?? "";
+    repsInput.value = recentEntry.reps ?? "";
+    weightInput.value = recentEntry.weight ?? "";
+    machineInput.value = recentEntry.machine ?? "";
+  } else {
+    setsInput.value = "";
+    repsInput.value = "";
+    weightInput.value = "";
+    machineInput.value = "";
   }
 }
 
@@ -74,43 +109,43 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const tbody = table.querySelector("tbody");
     const history = JSON.parse(localStorage.getItem("fitnessHistory")) || [];
-history.forEach(entry => entry.date = entry.date.trim()); // optional cleanup
-history.sort((a, b) => new Date(a.date) - new Date(b.date)); // sort newest to oldest
+    history.forEach((entry) => (entry.date = entry.date.trim())); // optional cleanup
+    history.sort((a, b) => new Date(a.date) - new Date(b.date)); // sort newest to oldest
 
-// Now render the table
-let lastDate = null;
-let toggle = false;
+    // Now render the table
+    let lastDate = null;
+    let toggle = false;
 
-history.forEach((entry) => {
-  if (entry.date !== lastDate) {
-    toggle = !toggle;
-    lastDate = entry.date;
-  }
+    history.forEach((entry) => {
+      if (entry.date !== lastDate) {
+        toggle = !toggle;
+        lastDate = entry.date;
+      }
 
-  const row = document.createElement("tr");
-  row.style.backgroundColor = toggle ? "#ffffff" : "#bbbbbbff";
+      const row = document.createElement("tr");
+      row.style.backgroundColor = toggle ? "#ffffff" : "#bbbbbbff";
 
-  Object.values(entry).forEach((value) => {
-    const cell = document.createElement("td");
-    cell.textContent = value;
-    cell.addEventListener("click", () => makeEditable(cell));
-    row.appendChild(cell);
-  });
+      Object.values(entry).forEach((value) => {
+        const cell = document.createElement("td");
+        cell.textContent = value;
+        cell.addEventListener("click", () => makeEditable(cell));
+        row.appendChild(cell);
+      });
 
-  const deleteCell = document.createElement("td");
-  const deleteBtn = document.createElement("button");
-  deleteBtn.className = "delButton";
-  deleteBtn.textContent = "✖";
-  deleteBtn.onclick = () => {
-    history.splice(history.indexOf(entry), 1);
-    localStorage.setItem("fitnessHistory", JSON.stringify(history));
-    row.remove();
-  };
-  deleteCell.appendChild(deleteBtn);
-  row.appendChild(deleteCell);
+      const deleteCell = document.createElement("td");
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className = "delButton";
+      deleteBtn.textContent = "✖";
+      deleteBtn.onclick = () => {
+        history.splice(history.indexOf(entry), 1);
+        localStorage.setItem("fitnessHistory", JSON.stringify(history));
+        row.remove();
+      };
+      deleteCell.appendChild(deleteBtn);
+      row.appendChild(deleteCell);
 
-  tbody.insertBefore(row, tbody.firstChild);
-});
+      tbody.insertBefore(row, tbody.firstChild);
+    });
 
     historySection.appendChild(table);
   }
@@ -153,8 +188,8 @@ function updateLocalStorage() {
       exercise: cells[1].textContent,
       sets: cells[2].textContent,
       reps: cells[3].textContent,
-      machine: cells[4].textContent,
-      weight: cells[5].textContent,
+      weight: cells[4].textContent, // weight should come before machine
+      machine: cells[5].textContent,
     };
     updatedHistory.push(entry);
   });
@@ -166,6 +201,4 @@ let deferredPrompt;
 window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault();
   deferredPrompt = e;
-  console.log("Install prompt captured");
-  // You can now show a custom install button and call deferredPrompt.prompt() when clicked
 });
