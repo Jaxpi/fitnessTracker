@@ -104,7 +104,11 @@ footer {
   margin: 2px;
 }
 
-#upper {
+#upperPush {
+  background: #006727;
+}
+
+#upperPull {
   background: #00bb09;
 }
 
@@ -117,7 +121,7 @@ footer {
 }
 
 #aerobic {
-  background: #7700a7;
+  background: #8200b6;
 }
 
 .form-popup {
