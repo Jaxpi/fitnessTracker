@@ -230,6 +230,7 @@ let editDigits = ""; // raw MMSS digits while editing
 const display = document.getElementById("timerDisplay");
 const startStopBtn = document.getElementById("timerStartStop");
 const resetBtn = document.getElementById("timerReset");
+const hidden = document.getElementById("timerHiddenInput");
 
 function formatTime(sec) {
   const mins = String(Math.floor(sec / 60)).padStart(2, "0");
@@ -301,54 +302,36 @@ resetBtn.addEventListener("click", () => {
   updateDisplay();
 });
 
-// ---------- Clicking the clock starts "edit mode" ----------
 display.addEventListener("click", () => {
   editingTimer = true;
   editDigits = "";
-  display.classList.remove("timer-alert"); // ← add this
+  display.classList.remove("timer-alert");
+
+  const hidden = document.getElementById("timerHiddenInput");
+  hidden.value = "";
+  hidden.focus();   // ← triggers mobile keyboard
+
   display.textContent = "00:00";
 });
 
-// ---------- Typing MMSS into the clock ----------
-display.addEventListener("keydown", (e) => {
-  // If we're not editing, ignore typing
-  if (!editingTimer) return;
+hidden.addEventListener("input", () => {
+  let raw = hidden.value.replace(/\D/g, "");
 
-  // Prevent browser from inserting characters
-  e.preventDefault();
+  // Keep only last 4 digits
+  raw = raw.slice(-4);
 
-  // Enter finishes editing (keeps current value)
-  if (e.key === "Enter") {
-    editingTimer = false;
-    return;
-  }
+  editDigits = raw;
 
-  // Backspace deletes last digit
-  if (e.key === "Backspace") {
-    editDigits = editDigits.slice(0, -1);
-  }
-
-  // If it's a digit, append (max 4 digits)
-  if (/^\d$/.test(e.key)) {
-    if (editDigits.length >= 4) {
-      // Keep last 4 digits (shift left)
-      editDigits = (editDigits + e.key).slice(-4);
-    } else {
-      editDigits += e.key;
-    }
-  }
-
-  // If no digits, show 00:00 but don't change timerSeconds yet
-  if (editDigits.length === 0) {
-    display.textContent = "00:00";
+  if (raw.length === 0) {
     timerSeconds = 0;
     lastEnteredSeconds = 0;
     countingDown = false;
+    display.textContent = "00:00";
     return;
   }
 
-  // Right-align into MMSS
-  let raw = editDigits.slice(-4).padStart(4, "0");
+  raw = raw.padStart(4, "0");
+
   const mins = parseInt(raw.slice(0, 2), 10);
   const secs = parseInt(raw.slice(2, 4), 10);
 
