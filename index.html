@@ -1,108 +1,268 @@
 <!DOCTYPE html>
 <html lang="en-US">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fitness Tracker</title>
-  <link rel="stylesheet" href="./style.css" />
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#4CAF50">
-</head>
-<body>
-  <header>
-    <nav>
-      <ul>
-        <li><a href="index.html">Home</a></li>
-        <li><a href="history.html">History</a></li>
-      </ul>
-    </nav>
-  </header>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fitness Tracker</title>
+    <link rel="stylesheet" href="./style.css" />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#4CAF50" />
+  </head>
+  <body>
+    <header>
+      <nav>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="history.html">History</a></li>
+        </ul>
+      </nav>
+    </header>
 
-  <div id="screenFlash"></div>
+    <div id="screenFlash"></div>
 
-  <main>
-    <section id="exercise-buttons">
-  <button class="open-button" id="upperPush" onclick="openForm(this.textContent)">K Chest Press Low</button>
-  <button class="open-button" id="upperPush" onclick="openForm(this.textContent)">K Chest Press Med</button>
-  <button class="open-button" id="upperPush" onclick="openForm(this.textContent)">K Chest Press High</button>
-  <button class="open-button" id="upperPush" onclick="openForm(this.textContent)">H Chest Press Wide</button>
-  <button class="open-button" id="upperPush" onclick="openForm(this.textContent)">H Chest Press Mid</button>
-  <button class="open-button" id="upperPush" onclick="openForm(this.textContent)">H Chest Press Nar</button>
-  <button class="open-button" id="upperPush" onclick="openForm(this.textContent)">Other Chest Press</button>
-  <button class="open-button" id="upperPush" onclick="openForm(this.textContent)">K Chest Fly</button>
-  <button class="open-button" id="upperPush" onclick="openForm(this.textContent)">Other Chest Fly</button>
-  <button class="open-button" id="upperPush" onclick="openForm(this.textContent)">Lat Raises</button>
-  <button class="open-button" id="upperPush" onclick="openForm(this.textContent)">Dip</button>
-  <button class="open-button" id="upperPush" onclick="openForm(this.textContent)">Tricep Ext</button>
-  <button class="open-button" id="upperPush" onclick="openForm(this.textContent)">Shoulder Press Wide</button>
-  <button class="open-button" id="upperPush" onclick="openForm(this.textContent)">Shoulder Press Narrow</button>
-  <button class="open-button" id="upperPull" onclick="openForm(this.textContent)">Rear Delt Fly</button>
-  <button class="open-button" id="upperPull" onclick="openForm(this.textContent)">Bicep Curl</button>
-  <button class="open-button" id="upperPull" onclick="openForm(this.textContent)">Wide Chin-Up</button>
-  <button class="open-button" id="upperPull" onclick="openForm(this.textContent)">Bicep Chin-Up</button>
-  <button class="open-button" id="upperPull" onclick="openForm(this.textContent)">K Row Wide High</button>
-  <button class="open-button" id="upperPull" onclick="openForm(this.textContent)">K Row Wide Low</button>
-  <button class="open-button" id="upperPull" onclick="openForm(this.textContent)">K Row Narrow High</button>
-  <button class="open-button" id="upperPull" onclick="openForm(this.textContent)">K Row Narrow Low</button>
-  <button class="open-button" id="upperPull" onclick="openForm(this.textContent)">Other Back Row</button>
-  <button class="open-button" id="upperPull" onclick="openForm(this.textContent)">Lat Pulldown</button>
-  <button class="open-button" id="lower" onclick="openForm(this.textContent)">Leg Press High</button>
-  <button class="open-button" id="lower" onclick="openForm(this.textContent)">Leg Press Med</button>
-  <button class="open-button" id="lower" onclick="openForm(this.textContent)">Leg Press Sumo</button>
-  <button class="open-button" id="lower" onclick="openForm(this.textContent)">S Leg Press</button>
-  <button class="open-button" id="lower" onclick="openForm(this.textContent)">Calf Raise</button>
-  <button class="open-button" id="lower" onclick="openForm(this.textContent)">Tibia Raise</button>
-  <button class="open-button" id="lower" onclick="openForm(this.textContent)">K Quad Ext</button>
-  <button class="open-button" id="lower" onclick="openForm(this.textContent)">M Quad Ext</button>
-  <button class="open-button" id="lower" onclick="openForm(this.textContent)">Hamstring Curl</button>
-  <button class="open-button" id="lower" onclick="openForm(this.textContent)">Hib Abduction Forw</button>
-  <button class="open-button" id="lower" onclick="openForm(this.textContent)">Hib Abduction Recl</button>
-  <button class="open-button" id="lower" onclick="openForm(this.textContent)">Hip Adduction</button>
-  <button class="open-button" id="lower" onclick="openForm(this.textContent)">Squat</button>
-  <button class="open-button" id="lower" onclick="openForm(this.textContent)">Deadlift</button>
-  <button class="open-button" id="lower" onclick="openForm(this.textContent)">Pendulum Butt</button>
-  <button class="open-button" id="lower" onclick="openForm(this.textContent)">Pendulum Abduction</button>
-  <button class="open-button" id="core" onclick="openForm(this.textContent)">Oblique Kettle Lift</button>
-  <button class="open-button" id="core" onclick="openForm(this.textContent)">Pullover</button>
-  <button class="open-button" id="core" onclick="openForm(this.textContent)">Ab Machine</button>
-  <button class="open-button" id="core" onclick="openForm(this.textContent)">Ab Roller</button>
-  <button class="open-button" id="core" onclick="openForm(this.textContent)">Ab Work</button>
-  <button class="open-button" id="core" onclick="openForm(this.textContent)">Hanging Leg Lift</button>
-  <button class="open-button" id="aerobic" onclick="openForm(this.textContent)">Walk</button>
-  <button class="open-button" id="aerobic" onclick="openForm(this.textContent)">Bike</button>
-  <button class="open-button" id="aerobic" onclick="openForm(this.textContent)">Elliptical</button>
-  <button class="open-button" id="aerobic" onclick="openForm(this.textContent)">Stairs</button>
-  <button class="open-button" id="aerobic" onclick="openForm(this.textContent)">Hand Bike</button>
-  <button class="open-button" id="aerobic" onclick="openForm(this.textContent)">Swim
-    </section>
+    <main>
+      <section id="exercise-buttons">
+        <!-- Upper Push Group -->
+        <div class="button-group upperPush">
+          <button class="group-toggle">Upper Push</button>
+          <div class="group-content">
+            <button class="open-button" onclick="openForm(this.textContent)">
+              K Chest Press Low
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              K Chest Press Med
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              K Chest Press High
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              H Chest Press Wide
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              H Chest Press Mid
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              H Chest Press Nar
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              Other Chest Press
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              K Chest Fly
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              Other Chest Fly
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              Lat Raises
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              Dip
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              Tricep Ext
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              Shoulder Press Wide
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              Shoulder Press Narrow
+            </button>
+          </div>
+        </div>
+        <!-- Upper Pull Group -->
+        <div class="button-group upperPull">
+          <button class="group-toggle">Upper Pull</button>
+          <div class="group-content">
+            <button class="open-button" onclick="openForm(this.textContent)">
+              Rear Delt Fly
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              Bicep Curl
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              Wide Chin-Up
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              Bicep Chin-Up
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              K Row Wide High
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              K Row Wide Low
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              K Row Narrow High
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              K Row Narrow Low
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              Other Back Row
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              Lat Pulldown
+            </button>
+          </div>
+        </div>
+        <!-- Lower Body Group -->
+        <div class="button-group lowerBody">
+          <button class="group-toggle">Lower Body</button>
+          <div class="group-content">
+            <button class="open-button" onclick="openForm(this.textContent)">
+              Leg Press High
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              Leg Press Med
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              Leg Press Sumo
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              S Leg Press
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              Calf Raise
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              Tibia Raise
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              K Quad Ext
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              M Quad Ext
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              Hamstring Curl
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              Hib Abduction Forw
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              Hib Abduction Recl
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              Hip Adduction
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              Squat
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              Deadlift
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              Pendulum Butt
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              Pendulum Abduction
+            </button>
+          </div>
+        </div>
+        <!-- Core Group -->
+        <div class="button-group core">
+          <button class="group-toggle">Core</button>
+          <div class="group-content">
+            <button class="open-button" onclick="openForm(this.textContent)">
+              Oblique Kettle Lift
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              Pullover
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              Ab Machine
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              Ab Roller
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              Ab Work
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              Hanging Leg Lift
+            </button>
+          </div>
+        </div>
+        <!-- Aerobic Group -->
+        <div class="button-group aerobic">
+          <button class="group-toggle">Aerobic</button>
+          <div class="group-content">
+            <button class="open-button" onclick="openForm(this.textContent)">
+              Walk
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              Bike
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              Elliptical
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              Stairs
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              Hand Bike
+            </button>
+            <button class="open-button" onclick="openForm(this.textContent)">
+              Swim
+            </button>
+          </div>
+        </div>
+      </section>
 
-    <div class="form-popup" id="myForm">
-      <form class="form-container" autocomplete="off">
-        <h1 id="formTitle">Details</h1>
-        <input type="number" placeholder="sets" name="sets" autocomplete="off" required />
-        <input type="number" placeholder="reps/mins" name="reps" autocomplete="off" required />
-        <input type="text" placeholder="weight/setting" name="weight" autocomplete="off" />
-        <select name="machine">
-        <option value="" disabled selected>Select machine</option>
-        <option value="Hoist">Hoist</option>
-        <option value="Keiser">Keiser</option>
-        <option value="Matrix">Matrix</option>
-        <option value="Cable">Cable</option>
-        <option value="Other">Other</option>
-        <option value="Free">Free</option>
-        </select>
+      <div class="form-popup" id="myForm">
+        <form class="form-container" autocomplete="off">
+          <h1 id="formTitle">Details</h1>
+          <input
+            type="number"
+            placeholder="sets"
+            name="sets"
+            autocomplete="off"
+            required
+          />
+          <input
+            type="number"
+            placeholder="reps/mins"
+            name="reps"
+            autocomplete="off"
+            required
+          />
+          <input
+            type="text"
+            placeholder="weight/setting"
+            name="weight"
+            autocomplete="off"
+          />
+          <select name="machine">
+            <option value="" disabled selected>Select machine</option>
+            <option value="Hoist">Hoist</option>
+            <option value="Keiser">Keiser</option>
+            <option value="Matrix">Matrix</option>
+            <option value="Cable">Cable</option>
+            <option value="Other">Other</option>
+            <option value="Free">Free</option>
+          </select>
 
-        <button type="submit" class="btn">Submit</button>
-        <button type="button" class="btn cancel" onclick="closeForm()">Close</button>
-      </form>
-    </div>
-  </main>
+          <button type="submit" class="btn">Submit</button>
+          <button type="button" class="btn cancel" onclick="closeForm()">
+            Close
+          </button>
+        </form>
+      </div>
 
-  <footer>
-    <p>&copy; 2025 Jax</p>
-  </footer>
+      <div id="timerContainer">
+        <button id="timerStartStop" class="timer-btn">Start</button>
+        <div id="timerDisplay">00:00</div>
+        <button id="timerReset" class="timer-btn">Reset</button>
+      </div>
+    </main>
 
-  <script src="./script.js"></script>
-</body>
+    <audio id="timerBeep" src="assets/beep.mp3.mp3" preload="auto"></audio>
+
+    <footer>
+      <p>&copy; 2025 Jax</p>
+    </footer>
+
+    <script src="./script.js"></script>
+  </body>
 </html>
-

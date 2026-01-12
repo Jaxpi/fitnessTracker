@@ -24,7 +24,14 @@ function openForm(exerciseName) {
   const weightInput = document.querySelector('#myForm [name="weight"]');
   const machineInput = document.querySelector('#myForm [name="machine"]');
 
-  if (!form || !title || !setsInput || !repsInput || !weightInput || !machineInput) {
+  if (
+    !form ||
+    !title ||
+    !setsInput ||
+    !repsInput ||
+    !weightInput ||
+    !machineInput
+  ) {
     console.warn("Form or inputs not found. Check IDs and name attributes.");
     return;
   }
@@ -202,3 +209,162 @@ window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault();
   deferredPrompt = e;
 });
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".group-toggle").forEach((toggle) => {
+    toggle.addEventListener("click", () => {
+      const content = toggle.nextElementSibling;
+      content.classList.toggle("show");
+    });
+  });
+});
+
+// ---------- Timer Logic ----------
+let timerInterval = null;
+let timerSeconds = 0;
+let lastEnteredSeconds = 0; // remembers last countdown time
+let countingDown = false;
+let editingTimer = false;
+let editDigits = ""; // raw MMSS digits while editing
+
+const display = document.getElementById("timerDisplay");
+const startStopBtn = document.getElementById("timerStartStop");
+const resetBtn = document.getElementById("timerReset");
+
+function formatTime(sec) {
+  const mins = String(Math.floor(sec / 60)).padStart(2, "0");
+  const secs = String(sec % 60).padStart(2, "0");
+  return `${mins}:${secs}`;
+}
+
+function updateDisplay() {
+  display.textContent = formatTime(timerSeconds);
+}
+
+function stopTimer() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  startStopBtn.textContent = "Start";
+}
+
+function startTimer() {
+  timerInterval = setInterval(() => {
+    if (countingDown) {
+      timerSeconds--;
+      if (timerSeconds <= 0) {
+        timerSeconds = 0;
+        stopTimer();
+
+        // Play sound
+        const beep = document.getElementById("timerBeep");
+        if (beep) {
+          // rewind to start in case it's been played before
+          beep.currentTime = 0;
+          beep.play().catch(() => {
+            // ignore play errors (e.g. browser blocking)
+          });
+        }
+
+        // Turn display red
+        display.classList.add("timer-alert");
+      }
+    } else {
+      timerSeconds++;
+    }
+    updateDisplay();
+  }, 1000);
+}
+
+// ---------- Start / Stop ----------
+startStopBtn.addEventListener("click", () => {
+  if (timerInterval) {
+    stopTimer();
+  } else {
+    startStopBtn.textContent = "Stop";
+    startTimer();
+  }
+});
+
+// ---------- Reset ----------
+resetBtn.addEventListener("click", () => {
+  stopTimer();
+  display.classList.remove("timer-alert"); // ← add this
+
+  if (lastEnteredSeconds > 0) {
+    timerSeconds = lastEnteredSeconds;
+    countingDown = true;
+  } else {
+    timerSeconds = 0;
+    countingDown = false;
+  }
+
+  updateDisplay();
+});
+
+// ---------- Clicking the clock starts "edit mode" ----------
+display.addEventListener("click", () => {
+  editingTimer = true;
+  editDigits = "";
+  display.classList.remove("timer-alert"); // ← add this
+  display.textContent = "00:00";
+});
+
+// ---------- Typing MMSS into the clock ----------
+display.addEventListener("keydown", (e) => {
+  // If we're not editing, ignore typing
+  if (!editingTimer) return;
+
+  // Prevent browser from inserting characters
+  e.preventDefault();
+
+  // Enter finishes editing (keeps current value)
+  if (e.key === "Enter") {
+    editingTimer = false;
+    return;
+  }
+
+  // Backspace deletes last digit
+  if (e.key === "Backspace") {
+    editDigits = editDigits.slice(0, -1);
+  }
+
+  // If it's a digit, append (max 4 digits)
+  if (/^\d$/.test(e.key)) {
+    if (editDigits.length >= 4) {
+      // Keep last 4 digits (shift left)
+      editDigits = (editDigits + e.key).slice(-4);
+    } else {
+      editDigits += e.key;
+    }
+  }
+
+  // If no digits, show 00:00 but don't change timerSeconds yet
+  if (editDigits.length === 0) {
+    display.textContent = "00:00";
+    timerSeconds = 0;
+    lastEnteredSeconds = 0;
+    countingDown = false;
+    return;
+  }
+
+  // Right-align into MMSS
+  let raw = editDigits.slice(-4).padStart(4, "0");
+  const mins = parseInt(raw.slice(0, 2), 10);
+  const secs = parseInt(raw.slice(2, 4), 10);
+
+  timerSeconds = mins * 60 + secs;
+  lastEnteredSeconds = timerSeconds;
+  countingDown = timerSeconds > 0;
+
+  display.textContent = formatTime(timerSeconds);
+});
+
+// When the clock loses focus (e.g., click elsewhere), stop editing
+display.addEventListener("blur", () => {
+  editingTimer = false;
+  // Ensure display matches current timerSeconds
+  display.textContent = formatTime(timerSeconds);
+});
+
+// Make the display focusable so keydown works
+display.tabIndex = 0;

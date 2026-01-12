@@ -104,23 +104,23 @@ footer {
   margin: 2px;
 }
 
-#upperPush {
+.upperPush {
   background: #006727;
 }
 
-#upperPull {
+.upperPull {
   background: #00bb09;
 }
 
-#lower {
+.lowerBody {
   background: rgb(0, 183, 255);
 }
 
-#core {
+.core {
   background: #022ec0;
 }
 
-#aerobic {
+.aerobic {
   background: #8200b6;
 }
 
@@ -276,4 +276,99 @@ input[type="submit"]:hover {
   .form-container {
     min-width: 80%;
   }
+}
+
+.button-group {
+  margin-bottom: 10px;
+}
+
+.group-toggle {
+  width: 90%;
+  max-width: 350px;
+  margin: 8px auto;
+  padding: 14px;
+  font-size: 20px;
+  font-weight: bold;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.group-toggle:hover {
+  opacity: 0.9;
+}
+
+.group-content {
+  display: none;
+  margin-top: 5px;
+}
+
+.group-content.show {
+  display: block;
+}
+
+/* Match group toggle to exercise colors */
+.button-group.upperPush .group-toggle {
+  background: #006727;
+}
+
+.button-group.upperPull .group-toggle {
+  background: #00bb09;
+}
+
+.button-group.lowerBody .group-toggle {
+  background: rgb(0, 183, 255);
+}
+
+.button-group.core .group-toggle {
+  background: #022ec0;
+}
+
+.button-group.aerobic .group-toggle {
+  background: #8200b6;
+}
+
+/* Timer Layout */
+#timerContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 90%;
+  max-width: 350px;
+  margin: 20px auto 80px auto; /* leave room above footer */
+}
+
+/* Timer Buttons */
+.timer-btn {
+  width: 30%;
+  padding: 12px;
+  background: black;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  opacity: 0.9;
+}
+
+.timer-btn:hover {
+  opacity: 1;
+}
+
+/* Timer Display */
+#timerDisplay {
+  width: 30%;
+  padding: 12px;
+  background: black;
+  color: white;
+  font-size: 20px;
+  border-radius: 6px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.timer-alert {
+  background: red !important;
+  color: white !important;
 }
