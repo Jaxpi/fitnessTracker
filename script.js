@@ -14,68 +14,125 @@ function flashWhiteScreen() {
 }
 
 // ---------- Form Controls ----------
+let currentExercise = null;
+let boostedFlag = false;
+
 function openForm(exerciseName) {
-  const form = document.getElementById("myForm"); // ensure this is a <form id="myForm">
+  const formWrapper = document.getElementById("myForm");
+  const form = document.querySelector("#myForm .form-container");
   const title = document.getElementById("formTitle");
 
-  // Input elements (use name attributes for consistency)
-  const setsInput = document.querySelector('#myForm [name="sets"]');
-  const repsInput = document.querySelector('#myForm [name="reps"]');
-  const weightInput = document.querySelector('#myForm [name="weight"]');
-  const machineInput = document.querySelector('#myForm [name="machine"]');
-
-  if (
-    !form ||
-    !title ||
-    !setsInput ||
-    !repsInput ||
-    !weightInput ||
-    !machineInput
-  ) {
-    console.warn("Form or inputs not found. Check IDs and name attributes.");
+  if (!formWrapper || !form || !title) {
+    console.warn("Form or form elements not found.");
     return;
   }
 
-  // Show form and set title
-  form.style.display = "block";
+  const setsInput = form.elements["sets"];
+  const repsInput = form.elements["reps"];
+  const weightInput = form.elements["weight"];
+  const machineInput = form.elements["machine"];
+
+  currentExercise = exerciseName;
+  boostedFlag = false;
+
+  formWrapper.style.display = "block";
   form.setAttribute("data-exercise", exerciseName);
   title.textContent = exerciseName;
 
-  // Pull history and find most recent matching entry
   let history = JSON.parse(localStorage.getItem("fitnessHistory")) || [];
 
-  // Because you unshift new entries, the first match is the most recent
-  const recentEntry = history.find(
+  // Pick most recent machine for this exercise (if any)
+  const recentAnyMachine = history.find(
     (entry) =>
       entry &&
       typeof entry.exercise === "string" &&
       entry.exercise.trim().toLowerCase() === exerciseName.trim().toLowerCase()
   );
 
-  // Prefill or clear
+  if (recentAnyMachine && recentAnyMachine.machine) {
+    machineInput.value = recentAnyMachine.machine;
+  } else {
+    machineInput.value = "";
+  }
+
+  prefillForExerciseAndMachine(exerciseName, machineInput.value, {
+    setsInput,
+    repsInput,
+    weightInput,
+  });
+}
+// make absolutely sure it's on window
+window.openForm = openForm;
+
+function prefillForExerciseAndMachine(exerciseName, machineName, inputs) {
+  const { setsInput, repsInput, weightInput } = inputs;
+  let history = JSON.parse(localStorage.getItem("fitnessHistory")) || [];
+
+  if (!machineName) {
+    setsInput.value = "";
+    repsInput.value = "";
+    weightInput.value = "";
+    return;
+  }
+
+  const recentEntry = history.find(
+    (entry) =>
+      entry &&
+      typeof entry.exercise === "string" &&
+      entry.exercise.trim().toLowerCase() ===
+        exerciseName.trim().toLowerCase() &&
+      entry.machine === machineName
+  );
+
   if (recentEntry) {
     setsInput.value = recentEntry.sets ?? "";
     repsInput.value = recentEntry.reps ?? "";
     weightInput.value = recentEntry.weight ?? "";
-    machineInput.value = recentEntry.machine ?? "";
   } else {
     setsInput.value = "";
     repsInput.value = "";
     weightInput.value = "";
-    machineInput.value = "";
   }
 }
 
 function closeForm() {
-  const form = document.getElementById("myForm");
-  if (form) {
-    form.style.display = "none";
+  const formWrapper = document.getElementById("myForm");
+  if (formWrapper) {
+    formWrapper.style.display = "none";
   }
 }
 
-// ---------- Form Submission ----------
+// ---------- Form Submission + Popup Behavior + Group Toggles ----------
 document.addEventListener("DOMContentLoaded", () => {
-  const form = document.querySelector(".form-container");
+  const form = document.querySelector("#myForm .form-container");
+  const title = document.getElementById("formTitle");
+  const machineSelect = document.getElementById("machineSelect");
+
+  // Toggle boosted via exercise name (+)
+  if (title) {
+    title.addEventListener("click", () => {
+      boostedFlag = !boostedFlag;
+      title.textContent = boostedFlag
+        ? `${currentExercise} +`
+        : currentExercise;
+    });
+  }
+
+  // Machine change → reload prefill
+  if (machineSelect && form) {
+    machineSelect.addEventListener("change", () => {
+      const setsInput = form.elements["sets"];
+      const repsInput = form.elements["reps"];
+      const weightInput = form.elements["weight"];
+      prefillForExerciseAndMachine(currentExercise, machineSelect.value, {
+        setsInput,
+        repsInput,
+        weightInput,
+      });
+    });
+  }
+
+  // Form submit → save entry
   if (form) {
     form.addEventListener("submit", function (e) {
       e.preventDefault();
@@ -83,80 +140,153 @@ document.addEventListener("DOMContentLoaded", () => {
       const entry = {
         date: new Date().toISOString().split("T")[0],
         exercise:
-          document.getElementById("formTitle").textContent || "Custom Entry",
+          currentExercise ||
+          document.getElementById("formTitle").textContent ||
+          "Custom Entry",
         sets: form.elements["sets"].value,
         reps: form.elements["reps"].value,
         weight: form.elements["weight"].value,
         machine: form.elements["machine"].value,
+        boosted: boostedFlag === true,
       };
 
       let history = JSON.parse(localStorage.getItem("fitnessHistory")) || [];
-      history.unshift(entry); // Add to top
+      history.unshift(entry);
       localStorage.setItem("fitnessHistory", JSON.stringify(history));
       flashWhiteScreen();
 
       form.reset();
+      boostedFlag = false;
       closeForm();
+      renderHistoryTable();
     });
   }
 
-  // ---------- History Page Rendering ----------
-  const historySection = document.getElementById("history");
-  if (historySection) {
-    const table = document.createElement("table");
-    table.id = "historyTable";
-    table.innerHTML = `
-      <thead>
-        <tr>
-          <th>Date</th><th>Exercise</th><th>Sets</th><th>Reps/Mins</th><th>Weight/Setting</th><th>Machine</th><th>Delete</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    `;
-
-    const tbody = table.querySelector("tbody");
-    const history = JSON.parse(localStorage.getItem("fitnessHistory")) || [];
-    history.forEach((entry) => (entry.date = entry.date.trim())); // optional cleanup
-    history.sort((a, b) => new Date(a.date) - new Date(b.date)); // sort newest to oldest
-
-    // Now render the table
-    let lastDate = null;
-    let toggle = false;
-
-    history.forEach((entry) => {
-      if (entry.date !== lastDate) {
-        toggle = !toggle;
-        lastDate = entry.date;
-      }
-
-      const row = document.createElement("tr");
-      row.style.backgroundColor = toggle ? "#ffffff" : "#bbbbbbff";
-
-      Object.values(entry).forEach((value) => {
-        const cell = document.createElement("td");
-        cell.textContent = value;
-        cell.addEventListener("click", () => makeEditable(cell));
-        row.appendChild(cell);
-      });
-
-      const deleteCell = document.createElement("td");
-      const deleteBtn = document.createElement("button");
-      deleteBtn.className = "delButton";
-      deleteBtn.textContent = "✖";
-      deleteBtn.onclick = () => {
-        history.splice(history.indexOf(entry), 1);
-        localStorage.setItem("fitnessHistory", JSON.stringify(history));
-        row.remove();
-      };
-      deleteCell.appendChild(deleteBtn);
-      row.appendChild(deleteCell);
-
-      tbody.insertBefore(row, tbody.firstChild);
+  // 🔹 Restore expandable exercise groups
+  document.querySelectorAll(".group-toggle").forEach((toggle) => {
+    toggle.addEventListener("click", () => {
+      const content = toggle.nextElementSibling;
+      content.classList.toggle("show");
     });
+  });
 
-    historySection.appendChild(table);
-  }
+  // Initial history render (if on history page)
+  renderHistoryTable();
 });
+
+// ---------- History Page Rendering ----------
+function renderHistoryTable() {
+  const historySection = document.getElementById("history");
+  if (!historySection) return;
+
+  const existing = document.getElementById("historyTable");
+  if (existing) existing.remove();
+
+  const table = document.createElement("table");
+  table.id = "historyTable";
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Exercise</th>
+        <th>Sets</th>
+        <th>Reps/Mins</th>
+        <th>Weight/Setting</th>
+        <th>Machine</th>
+        <th>Delete</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  `;
+
+  const tbody = table.querySelector("tbody");
+  const history = JSON.parse(localStorage.getItem("fitnessHistory")) || [];
+
+  history.forEach((entry) => {
+    if (entry.date) entry.date = entry.date.trim();
+    if (typeof entry.boosted === "undefined") entry.boosted = false;
+  });
+
+  history.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  let lastDate = null;
+  let toggle = false;
+
+  history.forEach((entry) => {
+    if (entry.date !== lastDate) {
+      toggle = !toggle;
+      lastDate = entry.date;
+    }
+
+    const row = document.createElement("tr");
+    row.style.backgroundColor = toggle ? "#ffffff" : "#bbbbbbff";
+
+    // Date
+    const dateCell = document.createElement("td");
+    dateCell.textContent = entry.date;
+    dateCell.addEventListener("click", () => makeEditable(dateCell));
+    row.appendChild(dateCell);
+
+    // Exercise (+ if boosted) — click-to-toggle
+    const exerciseCell = document.createElement("td");
+    exerciseCell.textContent = entry.boosted
+      ? `${entry.exercise} +`
+      : entry.exercise;
+    exerciseCell.addEventListener("click", () => {
+      entry.boosted = !entry.boosted;
+      exerciseCell.textContent = entry.boosted
+        ? `${entry.exercise} +`
+        : entry.exercise;
+      saveHistoryFromTable();
+    });
+    row.appendChild(exerciseCell);
+
+    // Sets
+    const setsCell = document.createElement("td");
+    setsCell.textContent = entry.sets;
+    setsCell.addEventListener("click", () => makeEditable(setsCell));
+    row.appendChild(setsCell);
+
+    // Reps
+    const repsCell = document.createElement("td");
+    repsCell.textContent = entry.reps;
+    repsCell.addEventListener("click", () => makeEditable(repsCell));
+    row.appendChild(repsCell);
+
+    // Weight
+    const weightCell = document.createElement("td");
+    weightCell.textContent = entry.weight;
+    weightCell.addEventListener("click", () => makeEditable(weightCell));
+    row.appendChild(weightCell);
+
+    // Machine
+    const machineCell = document.createElement("td");
+    machineCell.textContent = entry.machine;
+    machineCell.addEventListener("click", () => makeEditable(machineCell));
+    row.appendChild(machineCell);
+
+    // Delete
+    const deleteCell = document.createElement("td");
+    const deleteBtn = document.createElement("button");
+    deleteBtn.className = "delButton";
+    deleteBtn.textContent = "✖";
+    deleteBtn.onclick = () => {
+      const history = JSON.parse(localStorage.getItem("fitnessHistory")) || [];
+      const index = history.indexOf(entry);
+      if (index !== -1) {
+        history.splice(index, 1);
+        localStorage.setItem("fitnessHistory", JSON.stringify(history));
+      }
+      row.remove();
+    };
+    deleteCell.appendChild(deleteBtn);
+    row.appendChild(deleteCell);
+
+    tbody.insertBefore(row, tbody.firstChild);
+  });
+
+  historySection.appendChild(table);
+}
 
 // ---------- Editable Cell Logic ----------
 function makeEditable(cell) {
@@ -168,7 +298,7 @@ function makeEditable(cell) {
 
   input.addEventListener("blur", () => {
     cell.textContent = input.value;
-    updateLocalStorage();
+    saveHistoryFromTable();
   });
 
   input.addEventListener("keydown", (e) => {
@@ -182,21 +312,32 @@ function makeEditable(cell) {
   input.focus();
 }
 
-// ---------- Update localStorage after edits ----------
-function updateLocalStorage() {
+// ---------- Rebuild history from table into localStorage ----------
+function saveHistoryFromTable() {
   const rows = document.querySelectorAll("#historyTable tbody tr");
   const updatedHistory = [];
 
   rows.forEach((row) => {
     const cells = row.querySelectorAll("td");
-    if (cells.length < 6) return; // skip if row is malformed
+    if (cells.length < 7) return;
+
+    const date = cells[0].textContent;
+    let exerciseText = cells[1].textContent;
+    let boosted = false;
+
+    if (exerciseText.endsWith(" +")) {
+      boosted = true;
+      exerciseText = exerciseText.slice(0, -2);
+    }
+
     const entry = {
-      date: cells[0].textContent,
-      exercise: cells[1].textContent,
+      date,
+      exercise: exerciseText,
       sets: cells[2].textContent,
       reps: cells[3].textContent,
-      weight: cells[4].textContent, // weight should come before machine
+      weight: cells[4].textContent,
       machine: cells[5].textContent,
+      boosted,
     };
     updatedHistory.push(entry);
   });
@@ -204,150 +345,123 @@ function updateLocalStorage() {
   localStorage.setItem("fitnessHistory", JSON.stringify(updatedHistory));
 }
 
-let deferredPrompt;
-window.addEventListener("beforeinstallprompt", (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-});
-
-document.addEventListener("DOMContentLoaded", () => {
-  document.querySelectorAll(".group-toggle").forEach((toggle) => {
-    toggle.addEventListener("click", () => {
-      const content = toggle.nextElementSibling;
-      content.classList.toggle("show");
-    });
-  });
-});
-
 // ---------- Timer Logic ----------
 let timerInterval = null;
 let timerSeconds = 0;
-let lastEnteredSeconds = 0; // remembers last countdown time
+let lastEnteredSeconds = 0;
 let countingDown = false;
 let editingTimer = false;
-let editDigits = ""; // raw MMSS digits while editing
+let editDigits = "";
 
 const display = document.getElementById("timerDisplay");
 const startStopBtn = document.getElementById("timerStartStop");
 const resetBtn = document.getElementById("timerReset");
 const hidden = document.getElementById("timerHiddenInput");
 
-function formatTime(sec) {
-  const mins = String(Math.floor(sec / 60)).padStart(2, "0");
-  const secs = String(sec % 60).padStart(2, "0");
-  return `${mins}:${secs}`;
-}
+if (display && startStopBtn && resetBtn && hidden) {
+  function formatTime(sec) {
+    const mins = String(Math.floor(sec / 60)).padStart(2, "0");
+    const secs = String(sec % 60).padStart(2, "0");
+    return `${mins}:${secs}`;
+  }
 
-function updateDisplay() {
-  display.textContent = formatTime(timerSeconds);
-}
+  function updateDisplay() {
+    display.textContent = formatTime(timerSeconds);
+  }
 
-function stopTimer() {
-  clearInterval(timerInterval);
-  timerInterval = null;
-  startStopBtn.textContent = "Start";
-}
+  function stopTimer() {
+    clearInterval(timerInterval);
+    timerInterval = null;
+    startStopBtn.textContent = "Start";
+  }
 
-function startTimer() {
-  timerInterval = setInterval(() => {
-    if (countingDown) {
-      timerSeconds--;
-      if (timerSeconds <= 0) {
-        timerSeconds = 0;
-        stopTimer();
+  function startTimer() {
+    timerInterval = setInterval(() => {
+      if (countingDown) {
+        timerSeconds--;
+        if (timerSeconds <= 0) {
+          timerSeconds = 0;
+          stopTimer();
 
-        // Play sound
-        const beep = document.getElementById("timerBeep");
-        if (beep) {
-          // rewind to start in case it's been played before
-          beep.currentTime = 0;
-          beep.play().catch(() => {
-            // ignore play errors (e.g. browser blocking)
-          });
+          const beep = document.getElementById("timerBeep");
+          if (beep) {
+            beep.currentTime = 0;
+            beep.play().catch(() => {});
+          }
+
+          display.classList.add("timer-alert");
         }
-
-        // Turn display red
-        display.classList.add("timer-alert");
+      } else {
+        timerSeconds++;
       }
+      updateDisplay();
+    }, 1000);
+  }
+
+  startStopBtn.addEventListener("click", () => {
+    if (timerInterval) {
+      stopTimer();
     } else {
-      timerSeconds++;
+      startStopBtn.textContent = "Stop";
+      startTimer();
     }
-    updateDisplay();
-  }, 1000);
-}
+  });
 
-// ---------- Start / Stop ----------
-startStopBtn.addEventListener("click", () => {
-  if (timerInterval) {
+  resetBtn.addEventListener("click", () => {
     stopTimer();
-  } else {
-    startStopBtn.textContent = "Stop";
-    startTimer();
-  }
-});
+    display.classList.remove("timer-alert");
 
-// ---------- Reset ----------
-resetBtn.addEventListener("click", () => {
-  stopTimer();
-  display.classList.remove("timer-alert"); // ← add this
+    if (lastEnteredSeconds > 0) {
+      timerSeconds = lastEnteredSeconds;
+      countingDown = true;
+    } else {
+      timerSeconds = 0;
+      countingDown = false;
+    }
 
-  if (lastEnteredSeconds > 0) {
-    timerSeconds = lastEnteredSeconds;
-    countingDown = true;
-  } else {
-    timerSeconds = 0;
-    countingDown = false;
-  }
+    updateDisplay();
+  });
 
-  updateDisplay();
-});
+  display.addEventListener("click", () => {
+    editingTimer = true;
+    editDigits = "";
+    display.classList.remove("timer-alert");
 
-display.addEventListener("click", () => {
-  editingTimer = true;
-  editDigits = "";
-  display.classList.remove("timer-alert");
+    hidden.value = "";
+    hidden.focus();
 
-  const hidden = document.getElementById("timerHiddenInput");
-  hidden.value = "";
-  hidden.focus();   // ← triggers mobile keyboard
-
-  display.textContent = "00:00";
-});
-
-hidden.addEventListener("input", () => {
-  let raw = hidden.value.replace(/\D/g, "");
-
-  // Keep only last 4 digits
-  raw = raw.slice(-4);
-
-  editDigits = raw;
-
-  if (raw.length === 0) {
-    timerSeconds = 0;
-    lastEnteredSeconds = 0;
-    countingDown = false;
     display.textContent = "00:00";
-    return;
-  }
+  });
 
-  raw = raw.padStart(4, "0");
+  hidden.addEventListener("input", () => {
+    let raw = hidden.value.replace(/\D/g, "");
+    raw = raw.slice(-4);
+    editDigits = raw;
 
-  const mins = parseInt(raw.slice(0, 2), 10);
-  const secs = parseInt(raw.slice(2, 4), 10);
+    if (raw.length === 0) {
+      timerSeconds = 0;
+      lastEnteredSeconds = 0;
+      countingDown = false;
+      display.textContent = "00:00";
+      return;
+    }
 
-  timerSeconds = mins * 60 + secs;
-  lastEnteredSeconds = timerSeconds;
-  countingDown = timerSeconds > 0;
+    raw = raw.padStart(4, "0");
 
-  display.textContent = formatTime(timerSeconds);
-});
+    const mins = parseInt(raw.slice(0, 2), 10);
+    const secs = parseInt(raw.slice(2, 4), 10);
 
-// When the clock loses focus (e.g., click elsewhere), stop editing
-display.addEventListener("blur", () => {
-  editingTimer = false;
-  // Ensure display matches current timerSeconds
-  display.textContent = formatTime(timerSeconds);
-});
+    timerSeconds = mins * 60 + secs;
+    lastEnteredSeconds = timerSeconds;
+    countingDown = timerSeconds > 0;
 
-// Make the display focusable so keydown works
-display.tabIndex = 0;
+    display.textContent = formatTime(timerSeconds);
+  });
+
+  display.addEventListener("blur", () => {
+    editingTimer = false;
+    display.textContent = formatTime(timerSeconds);
+  });
+
+  display.tabIndex = 0;
+}

@@ -213,6 +213,19 @@
       <div class="form-popup" id="myForm">
         <form class="form-container" autocomplete="off">
           <h1 id="formTitle">Details</h1>
+
+          <select name="machine" id="machineSelect">
+            <option value="" disabled selected>Select machine</option>
+            <option value="Hoist">Hoist</option>
+            <option value="Keiser">Keiser</option>
+            <option value="Matrix">Matrix</option>
+            <option value="Cable">Cable</option>
+            <option value="Hammer">Hammer</option>
+            <option value="LifeFitness">Life Fitness</option>
+            <option value="Free">Free</option>
+            <option value="Other">Other</option>
+          </select>
+
           <input
             type="number"
             placeholder="sets"
@@ -233,15 +246,6 @@
             name="weight"
             autocomplete="off"
           />
-          <select name="machine">
-            <option value="" disabled selected>Select machine</option>
-            <option value="Hoist">Hoist</option>
-            <option value="Keiser">Keiser</option>
-            <option value="Matrix">Matrix</option>
-            <option value="Cable">Cable</option>
-            <option value="Other">Other</option>
-            <option value="Free">Free</option>
-          </select>
 
           <button type="submit" class="btn">Submit</button>
           <button type="button" class="btn cancel" onclick="closeForm()">
@@ -255,8 +259,13 @@
         <div id="timerDisplay">00:00</div>
         <button id="timerReset" class="timer-btn">Reset</button>
       </div>
-      <input id="timerHiddenInput" type="tel" inputmode="numeric" pattern="[0-9]*" style="opacity:0; position:absolute; left:-9999px;">
-
+      <input
+        id="timerHiddenInput"
+        type="tel"
+        inputmode="numeric"
+        pattern="[0-9]*"
+        style="opacity: 0; position: absolute; left: -9999px"
+      />
     </main>
 
     <audio id="timerBeep" src="assets/beep.mp3.mp3" preload="auto"></audio>
