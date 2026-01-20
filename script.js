@@ -1,8 +1,6 @@
 // ---------- Service Worker ----------
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker
-    .register("sw.js", { scope: "./" })
-    .catch(() => {});
+  navigator.serviceWorker.register("sw.js", { scope: "./" }).catch(() => {});
 }
 
 // ---------- Small Utility ----------
@@ -31,8 +29,9 @@ function prefillForExerciseAndMachine(exerciseName, machineName, inputs) {
   const recentEntry = history.find(
     (entry) =>
       entry &&
-      entry.exercise?.trim().toLowerCase() === exerciseName.trim().toLowerCase() &&
-      entry.machine === machineName
+      entry.exercise?.trim().toLowerCase() ===
+        exerciseName.trim().toLowerCase() &&
+      entry.machine === machineName,
   );
 
   setsInput.value = recentEntry?.sets ?? "";
@@ -57,7 +56,8 @@ function openForm(exerciseName) {
 
   const history = JSON.parse(localStorage.getItem("fitnessHistory")) || [];
   const recent = history.find(
-    (e) => e.exercise?.trim().toLowerCase() === exerciseName.trim().toLowerCase()
+    (e) =>
+      e.exercise?.trim().toLowerCase() === exerciseName.trim().toLowerCase(),
   );
 
   const machineInput = form.elements["machine"];
@@ -132,7 +132,7 @@ function renderHistoryTable() {
     row.appendChild(makeCell(entry.date, true));
 
     const exerciseCell = makeCell(
-      entry.boosted ? `${entry.exercise} +` : entry.exercise
+      entry.boosted ? `${entry.exercise} +` : entry.exercise,
     );
     exerciseCell.addEventListener("click", () => {
       entry.boosted = !entry.boosted;
@@ -152,15 +152,28 @@ function renderHistoryTable() {
     const btn = document.createElement("button");
     btn.className = "delButton";
     btn.textContent = "✖";
-    btn.onclick = () => {
-      const h = JSON.parse(localStorage.getItem("fitnessHistory")) || [];
-      const idx = h.indexOf(entry);
-      if (idx !== -1) {
-        h.splice(idx, 1);
-        localStorage.setItem("fitnessHistory", JSON.stringify(h));
-      }
-      row.remove();
-    };
+btn.onclick = () => {
+  const h = JSON.parse(localStorage.getItem("fitnessHistory")) || [];
+
+  const rows = Array.from(document.querySelectorAll("#historyTable tbody tr"));
+  const domIndex = rows.indexOf(row);
+  const arrayIndex = h.length - 1 - domIndex;
+
+  console.log("Delete mapping:", { domIndex, arrayIndex, arrayLength: h.length });
+
+  if (arrayIndex >= 0 && arrayIndex < h.length) {
+    h.splice(arrayIndex, 1);
+    localStorage.setItem("fitnessHistory", JSON.stringify(h));
+  }
+
+  // Remove from UI
+  row.remove();
+
+  // 🔥 Critical: update localStorage based on new DOM
+  saveHistoryFromTable();
+};
+
+
     del.appendChild(btn);
     row.appendChild(del);
 
