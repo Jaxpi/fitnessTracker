@@ -152,27 +152,32 @@ function renderHistoryTable() {
     const btn = document.createElement("button");
     btn.className = "delButton";
     btn.textContent = "✖";
-btn.onclick = () => {
-  const h = JSON.parse(localStorage.getItem("fitnessHistory")) || [];
+    btn.onclick = () => {
+      const h = JSON.parse(localStorage.getItem("fitnessHistory")) || [];
 
-  const rows = Array.from(document.querySelectorAll("#historyTable tbody tr"));
-  const domIndex = rows.indexOf(row);
-  const arrayIndex = h.length - 1 - domIndex;
+      const rows = Array.from(
+        document.querySelectorAll("#historyTable tbody tr"),
+      );
+      const domIndex = rows.indexOf(row);
+      const arrayIndex = h.length - 1 - domIndex;
 
-  console.log("Delete mapping:", { domIndex, arrayIndex, arrayLength: h.length });
+      console.log("Delete mapping:", {
+        domIndex,
+        arrayIndex,
+        arrayLength: h.length,
+      });
 
-  if (arrayIndex >= 0 && arrayIndex < h.length) {
-    h.splice(arrayIndex, 1);
-    localStorage.setItem("fitnessHistory", JSON.stringify(h));
-  }
+      if (arrayIndex >= 0 && arrayIndex < h.length) {
+        h.splice(arrayIndex, 1);
+        localStorage.setItem("fitnessHistory", JSON.stringify(h));
+      }
 
-  // Remove from UI
-  row.remove();
+      // Remove from UI
+      row.remove();
 
-  // 🔥 Critical: update localStorage based on new DOM
-  saveHistoryFromTable();
-};
-
+      // 🔥 Critical: update localStorage based on new DOM
+      saveHistoryFromTable();
+    };
 
     del.appendChild(btn);
     row.appendChild(del);
