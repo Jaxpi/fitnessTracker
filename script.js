@@ -134,44 +134,46 @@ function renderHistoryTable() {
     const exerciseCell = makeCell(
       entry.boosted ? `${entry.exercise} +` : entry.exercise,
     );
-    
+
     let pressTimer;
     let longPressTriggered = false;
 
-    function startPress(e) {
+    // Long‑press setup (desktop + mobile)
+    function startLongPress() {
       longPressTriggered = false;
-
-      // Prevent mobile from also firing a click
-      e.preventDefault();
-
       pressTimer = setTimeout(() => {
         longPressTriggered = true;
         makeEditable(exerciseCell);
-      }, 500);
+      }, 500); // long‑press duration
     }
 
-    function endPress() {
+    function cancelLongPress() {
       clearTimeout(pressTimer);
-
-      if (!longPressTriggered) {
-        // Short tap → toggle +
-        entry.boosted = !entry.boosted;
-        exerciseCell.textContent = entry.boosted
-          ? `${entry.exercise} +`
-          : entry.exercise;
-        saveHistoryFromTable();
-      }
     }
 
-    // Desktop events
-    exerciseCell.addEventListener("mousedown", startPress);
-    exerciseCell.addEventListener("mouseup", endPress);
-    exerciseCell.addEventListener("mouseleave", () => clearTimeout(pressTimer));
+    // Desktop
+    exerciseCell.addEventListener("mousedown", startLongPress);
+    exerciseCell.addEventListener("mouseup", cancelLongPress);
+    exerciseCell.addEventListener("mouseleave", cancelLongPress);
 
-    // Mobile events
-    exerciseCell.addEventListener("touchstart", startPress, { passive: false });
-    exerciseCell.addEventListener("touchend", endPress);
-    exerciseCell.addEventListener("touchmove", () => clearTimeout(pressTimer));
+    // Mobile
+    exerciseCell.addEventListener("touchstart", startLongPress);
+    exerciseCell.addEventListener("touchend", cancelLongPress);
+    exerciseCell.addEventListener("touchmove", cancelLongPress);
+
+    // Original click behavior, unchanged timing
+    exerciseCell.addEventListener("click", () => {
+      if (longPressTriggered) {
+        // Long‑press already handled this interaction → skip toggle
+        return;
+      }
+
+      entry.boosted = !entry.boosted;
+      exerciseCell.textContent = entry.boosted
+        ? `${entry.exercise} +`
+        : entry.exercise;
+      saveHistoryFromTable();
+    });
 
     row.appendChild(exerciseCell);
 
