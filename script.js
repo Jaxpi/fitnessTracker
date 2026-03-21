@@ -135,30 +135,38 @@ function renderHistoryTable() {
       entry.boosted ? `${entry.exercise} +` : entry.exercise,
     );
     let pressTimer;
+    let longPressTriggered = false;
 
-    exerciseCell.addEventListener("mousedown", () => {
+    function startPress() {
+      longPressTriggered = false;
       pressTimer = setTimeout(() => {
-        // Long press → edit text
+        longPressTriggered = true;
         makeEditable(exerciseCell);
-        pressTimer = null; // prevents tap toggle
-      }, 500); // long‑press duration
-    });
+      }, 500);
+    }
 
-    exerciseCell.addEventListener("mouseup", () => {
-      if (pressTimer) {
+    function endPress() {
+      clearTimeout(pressTimer);
+
+      if (!longPressTriggered) {
         // Short tap → toggle +
         entry.boosted = !entry.boosted;
         exerciseCell.textContent = entry.boosted
           ? `${entry.exercise} +`
           : entry.exercise;
         saveHistoryFromTable();
-        clearTimeout(pressTimer);
       }
-    });
+    }
 
-    exerciseCell.addEventListener("mouseleave", () => {
-      clearTimeout(pressTimer);
-    });
+    // Desktop
+    exerciseCell.addEventListener("mousedown", startPress);
+    exerciseCell.addEventListener("mouseup", endPress);
+    exerciseCell.addEventListener("mouseleave", () => clearTimeout(pressTimer));
+
+    // Mobile
+    exerciseCell.addEventListener("touchstart", startPress);
+    exerciseCell.addEventListener("touchend", endPress);
+    exerciseCell.addEventListener("touchmove", () => clearTimeout(pressTimer));
 
     row.appendChild(exerciseCell);
 
