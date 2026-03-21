@@ -134,13 +134,32 @@ function renderHistoryTable() {
     const exerciseCell = makeCell(
       entry.boosted ? `${entry.exercise} +` : entry.exercise,
     );
-    exerciseCell.addEventListener("click", () => {
-      entry.boosted = !entry.boosted;
-      exerciseCell.textContent = entry.boosted
-        ? `${entry.exercise} +`
-        : entry.exercise;
-      saveHistoryFromTable();
+    let pressTimer;
+
+    exerciseCell.addEventListener("mousedown", () => {
+      pressTimer = setTimeout(() => {
+        // Long press → edit text
+        makeEditable(exerciseCell);
+        pressTimer = null; // prevents tap toggle
+      }, 500); // long‑press duration
     });
+
+    exerciseCell.addEventListener("mouseup", () => {
+      if (pressTimer) {
+        // Short tap → toggle +
+        entry.boosted = !entry.boosted;
+        exerciseCell.textContent = entry.boosted
+          ? `${entry.exercise} +`
+          : entry.exercise;
+        saveHistoryFromTable();
+        clearTimeout(pressTimer);
+      }
+    });
+
+    exerciseCell.addEventListener("mouseleave", () => {
+      clearTimeout(pressTimer);
+    });
+
     row.appendChild(exerciseCell);
 
     row.appendChild(makeCell(entry.sets, true));
