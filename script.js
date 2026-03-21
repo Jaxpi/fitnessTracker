@@ -134,11 +134,16 @@ function renderHistoryTable() {
     const exerciseCell = makeCell(
       entry.boosted ? `${entry.exercise} +` : entry.exercise,
     );
+    
     let pressTimer;
     let longPressTriggered = false;
 
-    function startPress() {
+    function startPress(e) {
       longPressTriggered = false;
+
+      // Prevent mobile from also firing a click
+      e.preventDefault();
+
       pressTimer = setTimeout(() => {
         longPressTriggered = true;
         makeEditable(exerciseCell);
@@ -158,13 +163,13 @@ function renderHistoryTable() {
       }
     }
 
-    // Desktop
+    // Desktop events
     exerciseCell.addEventListener("mousedown", startPress);
     exerciseCell.addEventListener("mouseup", endPress);
     exerciseCell.addEventListener("mouseleave", () => clearTimeout(pressTimer));
 
-    // Mobile
-    exerciseCell.addEventListener("touchstart", startPress);
+    // Mobile events
+    exerciseCell.addEventListener("touchstart", startPress, { passive: false });
     exerciseCell.addEventListener("touchend", endPress);
     exerciseCell.addEventListener("touchmove", () => clearTimeout(pressTimer));
 
